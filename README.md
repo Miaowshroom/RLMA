@@ -3,8 +3,17 @@ This code is for the paper: Minimalistic Attacks: How Little it Takes to Fool a 
 
 # Usage
 
-	# install conda and run in the repo
+	# install environment from .yml
 	conda env create -f env.yml
+
+	# source env
+	source activate RLMA
+
+	# install some special packages that could not be installed from pip
+	pip install -r .req.txt
+
+	# remember to deactive the environment when you don't need it any more or switch to other tasks :)
+	conda deactivate
 
 # Notice
 	Some code modifications have been done and the new code is in Minimalistic_Attack.py.
