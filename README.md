@@ -10,7 +10,7 @@ This code is for the paper: Minimalistic Attacks: How Little it Takes to Fool a 
 	source activate RLMA
 
 	# install some special packages that could not be installed from pip
-	pip install -r .req.txt
+	pip install -r req.txt
 
 	# remember to deactive the environment when you don't need it any more or switch to other tasks :)
 	conda deactivate
