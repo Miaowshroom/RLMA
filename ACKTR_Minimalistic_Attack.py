@@ -74,7 +74,7 @@ def main(game,method,pixels,tca,runname,run):
         return entropy
 
     alg       = GA
-    model = DQN.load("trained_agents/{}/{}NoFrameskip-v4".format(method,game))
+    model = DQN.load("trained_agents/{}/{}NoFrameskip-v4.pkl".format(method,game))
     Episode_Reward = []
     Episode_Lenth  = []
     Attack_times   = []
