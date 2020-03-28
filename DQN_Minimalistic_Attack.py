@@ -9,7 +9,7 @@ from IPython import display
 from multiprocessing import Pool
 from pybrain.optimization import GA,CMAES,HillClimber,RandomSearch
 import os
-from stable_baselines import DQN,PPO2,DDPG,A2C,ACER,ACKTR
+from stable_baselines import DQN,PPO2,A2C,ACER,ACKTR
 import time
 import cv2
 from cv2 import *
@@ -74,7 +74,7 @@ def main(game,method,pixels,tca,runname,run):
         return entropy
 
     alg       = GA
-    model = DQN.load("trained_agents/{}/{}NoFrameskip-v4".format(method,game))
+    model = DQN.load("trained_agents/{}/{}NoFrameskip-v4.pkl".format(method,game))
     Episode_Reward = []
     Episode_Lenth  = []
     Attack_times   = []

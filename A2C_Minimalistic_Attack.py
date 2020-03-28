@@ -9,7 +9,7 @@ from IPython import display
 from multiprocessing import Pool
 from pybrain.optimization import GA,CMAES,HillClimber,RandomSearch
 import os
-from stable_baselines import DQN,PPO2,DDPG,A2C,ACER,ACKTR
+from stable_baselines import DQN,PPO2,A2C,ACER,ACKTR
 import time
 import cv2
 from cv2 import *
