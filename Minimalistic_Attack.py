@@ -90,18 +90,21 @@ def main(game,method,pixels,tca,runname,run):
     }
     
     model = modelMap[method].load("trained_agents/{}/{}NoFrameskip-v4.pkl".format(method,game))
+    print(f"Model {method}NoFrameskip-v4 loaded")
     Episode_Reward = []
     Episode_Lenth  = []
     Attack_times   = []
     dir_name = 'results/{}/{}/{}/FSA_{}_TCA_{}'.format(runname,method, game, pixels,tca)
+    print(f"result will be save in {dir_name}")
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
     atk_num = pixels
     bounds = [[0,1],[0,1],[0,1]]*atk_num
     env = make_atari_env('{}NoFrameskip-v4'.format(game), num_env=1, seed=run,wrapper_kwargs=None,start_index=0, allow_early_resets=True, start_method=None)
+    print(f"Make environment {game}NoFrameskip-v4: Done")
     env = VecFrameStack(env, n_stack=4)
     env.reset()
-    model.set_env(env);
+    model.set_env(env)
     obs = env.reset()
     x0 = [0.5,0.5,0.5]*atk_num
     atk_time = 0
@@ -109,8 +112,14 @@ def main(game,method,pixels,tca,runname,run):
     Delta_array = []
     CleanS_array= []
 
+    print(f"Start training! run number {run}")
+    epoch = 5000
 
-    for i in range(5000):
+    for i in range(epoch):
+
+        if i % 50 == 0:              # cache our model every <save_epoch_freq> epochs
+            print(f'Training model for run {run} epoch {i} / {epoch}')
+
         actions = model.action_probability(obs)
         attack_significance = calculate_entropy(actions[0])
         CleanS_array.append((obs[0,:,:,3]).astype('uint8'))
@@ -200,12 +209,12 @@ def parse_arguments():
 
 if __name__ == '__main__':
     # note: You could change pool number and X_input at the same time
-    p = Pool(1)
+    p = Pool(10)
     
     game,method,pixels,tca,runname = parse_arguments()
     
     # X_input = list(range(1,5))
-    X_input = [1]
+    X_input = list(range(1,10))
 
     func = partial(main,game,method,pixels,tca,runname)
     p.map(func,X_input)
