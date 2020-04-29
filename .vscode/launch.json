@@ -40,7 +40,48 @@
                 "-r",
                 "dqnrun"
             ],
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Python: Minimalistic_Attack.py additional trained agent",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/Minimalistic_Attack.py",
+            "args": [
+                "-g",
+                "LunarLanderContinuous-v2.pkl",
+                "-a",
+                "a2c",
+                "-n",
+                "1",
+                "-t",
+                "0.9",
+                "-r",
+                "a2crun"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Python: Minimalistic_Attack.py additional trained agent discrete",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/Minimalistic_Attack.py",
+            "args": [
+                "-g",
+                "BipedalWalkerHardcore-v3.pkl",
+                "-a",
+                "a2c",
+                "-n",
+                "1",
+                "-t",
+                "0.9",
+                "-r",
+                "a2crun"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
         }
     ]
 }

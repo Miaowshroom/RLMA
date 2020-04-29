@@ -5,13 +5,15 @@ from IPython import display
 import matplotlib.pyplot as plt
 from argparse import ArgumentParser
 import time
-
+import gym
 from stable_baselines.common.atari_wrappers import make_atari
 from stable_baselines.deepq.policies import MlpPolicy, CnnPolicy
 from stable_baselines.common.cmd_util import make_atari_env
-from stable_baselines.common.vec_env import VecFrameStack
+from stable_baselines.common import make_vec_env
+from stable_baselines.common.vec_env import VecFrameStack, DummyVecEnv
 from pybrain.optimization import GA, CMAES, HillClimber, RandomSearch
 from stable_baselines import DQN, PPO2, A2C, ACER, ACKTR, SAC
+
 from cv2 import *
 
 
@@ -113,12 +115,16 @@ def main(game, method, pixels, tca, runname, run):
 
 
     if '.pkl' in game or '.pickle' in game:
-        env = make_atari_env('{}'.format(game.split(".")[0]), num_env=1, seed=run, wrapper_kwargs=None, start_index=0, allow_early_resets=True, start_method=None)
-        print(f"Make environment {game}: Done")
+
+        # env = make_vec_env("LunarLanderContinuous-v2", n_envs=20)
+        env = make_vec_env(game.split(".")[0], n_envs=20)
+        
+        # print(f"Make environment {game}: Done")
+        # env = DummyVecEnv([lambda: env]) 
     else:
         env = make_atari_env('{}NoFrameskip-v4'.format(game), num_env=1, seed=run)
         print(f"Make environment {game}NoFrameskip-v4: Done")
-    env = VecFrameStack(env, n_stack=4)
+        env = VecFrameStack(env, n_stack=4)
     env.reset()
     model.set_env(env)
     obs = env.reset()
