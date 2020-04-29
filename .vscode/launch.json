@@ -97,7 +97,7 @@
                 "-n",
                 "1",
                 "-t",
-                "0.02",
+                "0.2",
                 "-r",
                 "SAC-discrete",
                 "--customized_path",

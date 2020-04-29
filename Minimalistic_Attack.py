@@ -48,6 +48,8 @@ def main(game, method, pixels, tca, runname, run, customized_path=''):
                 perturbation[:, x, y, :] = pixel_attack 
         np.clip(perturbation, 0, brightness)
         obs_new = obs + perturbation
+        obs_new[obs_new > brightness] = brightness
+        obs_new[obs_new < 0] = 0
         actions_new = model.action_probability(obs_new)
         if len(obs.shape) < 4:
             fitness_value = max_max_distance(np.expand_dims(actions_new, axis=0), np.expand_dims(actions_0, axis=0))
@@ -72,6 +74,8 @@ def main(game, method, pixels, tca, runname, run, customized_path=''):
             # print('pixel_attack', x, y, pixel_attack)  
         np.clip(perturbation, 0, brightness)
         obs_new = obs + perturbation
+        obs_new[obs_new > brightness] = brightness
+        obs_new[obs_new < 0] = 0
         actions = model.action_probability(obs)
         actions_new = model.action_probability(obs_new)
         if len(obs.shape) < 4:
