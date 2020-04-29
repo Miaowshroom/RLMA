@@ -1,0 +1,46 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: DQN_Minimalistic_Attack.py run",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/DQN_Minimalistic_Attack.py",
+            "args": [
+                "-g",
+                "Pong",
+                "-a",
+                "dqn",
+                "-n",
+                "5",
+                "-t",
+                "0.9",
+                "-r",
+                "dqnrun"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: Minimalistic_Attack.py run",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/Minimalistic_Attack.py",
+            "args": [
+                "-g",
+                "Pong",
+                "-a",
+                "dqn",
+                "-n",
+                "1",
+                "-t",
+                "0.9",
+                "-r",
+                "dqnrun"
+            ],
+            "console": "integratedTerminal"
+        }
+    ]
+}
