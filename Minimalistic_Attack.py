@@ -33,7 +33,7 @@ os.environ['KMP_WARNINGS'] = 'off'
 def main(game, method, pixels, tca, runname, run, customized_path=''):
 
     def obj(variable, actions_0, obs):
-        brightness = np.min([obs.max(), 254])
+        brightness = np.min([obs.max(), 254])  # this takes min of the max brightness of the obs and 254, original code put 254
         perturbation = np.zeros_like(obs)
         for i in range(len(variable) // 3):
             x = int(np.round(variable[3*i]*83))
@@ -48,7 +48,7 @@ def main(game, method, pixels, tca, runname, run, customized_path=''):
                 perturbation[:, x, y, :] = pixel_attack 
         np.clip(perturbation, 0, brightness)
         obs_new = obs + perturbation
-        obs_new[obs_new > brightness] = brightness
+        obs_new[obs_new > brightness] = brightness  # restrict the max intensity to 254
         obs_new[obs_new < 0] = 0
         actions_new = model.action_probability(obs_new)
         if len(obs.shape) < 4:
@@ -230,8 +230,8 @@ def main(game, method, pixels, tca, runname, run, customized_path=''):
         if episode_infos is not None:
             print("Atari Episode Score: {:.2f}".format(episode_infos['r']))
             print("Atari Episode Length", episode_infos['l'])
-            REWARD = episode_infos['r']
-            Lenth = episode_infos['l']
+            REWARD = episode_infos['r']  # length of REWARD
+            Lenth = episode_infos['l']  # length of episode
             break
     size = (84, 84)
     video_dir = 'results/{}_videos/{}/{}/FSA_{}_TCA_{}'.format(runname, method, game, pixels, tca)

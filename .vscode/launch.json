@@ -105,6 +105,28 @@
             ],
             "console": "integratedTerminal",
             "justMyCode": false
+        },
+        {
+            "name": "Python: Minimalistic_Attack.py beamRider a2c",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/Minimalistic_Attack.py",
+            "args": [
+                "-g",
+                "BeamRider",
+                "-a",
+                "a2c",
+                "-n",
+                "1",
+                "-t",
+                "0.2",
+                "-r",
+                "a2crun",
+                "--customized_path",
+                ""
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
         }
     ]
 }
