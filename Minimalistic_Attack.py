@@ -13,6 +13,8 @@ from stable_baselines.common import make_vec_env
 from stable_baselines.common.vec_env import VecFrameStack, DummyVecEnv
 from pybrain.optimization import GA, CMAES, HillClimber, RandomSearch
 from stable_baselines import DQN, PPO2, A2C, ACER, ACKTR, SAC
+from Utils.model_loader import model_loader
+from Utils.envGym import envGym
 
 from cv2 import *
 
@@ -28,10 +30,10 @@ from cv2 import *
 os.environ['KMP_WARNINGS'] = 'off'
 
 
-def main(game, method, pixels, tca, runname, run):
+def main(game, method, pixels, tca, runname, run, customized_path=''):
 
     def obj(variable, actions_0, obs):
-        perturbation = np.zeros([1, 84, 84, 4])
+        perturbation = np.zeros_like(obs)
         for i in range(len(variable) // 3):
             x = int(np.round(variable[3*i]*83))
             y = int(np.round(variable[3*i+1]*83))
@@ -39,15 +41,22 @@ def main(game, method, pixels, tca, runname, run):
             x = np.clip(x, 0, 83)
             y = np.clip(y, 0, 83)
             pixel_attack = np.clip(pixel_attack, 0, 254)
-            perturbation[:, x, y, :] = pixel_attack 
+            if len(obs.shape) < 4:
+                perturbation[ x, y, :] = pixel_attack 
+            else:
+                perturbation[:, x, y, :] = pixel_attack 
         np.clip(perturbation, 0, 254)
         obs_new = obs + perturbation
         actions_new = model.action_probability(obs_new)
-        fitness_value = max_max_distance(actions_new, actions_0)
+        if len(obs.shape) < 4:
+            fitness_value = max_max_distance(np.expand_dims(actions_new, axis=0), np.expand_dims(actions_0, axis=0))
+        else:
+            fitness_value = max_max_distance(actions_new, actions_0)
         return fitness_value
 
     def evaluate(variable, obs):
-        perturbation = np.zeros([1, 84, 84, 4])
+
+        perturbation = np.zeros_like(obs)
         for i in range(len(variable) // 3):
             x = int(np.round(variable[3 * i] * 83))
             y = int(np.round(variable[3 * i + 1] * 83))
@@ -55,13 +64,20 @@ def main(game, method, pixels, tca, runname, run):
             x = np.clip(x, 0, 83)
             y = np.clip(y, 0, 83)
             pixel_attack = np.clip(pixel_attack, 0, 254)
-            perturbation[: , x, y, :] = pixel_attack
+            if len(obs.shape)<4:
+                perturbation[x, y, :] = pixel_attack
+            else:
+                perturbation[: , x, y, :] = pixel_attack
             # print('pixel_attack', x, y, pixel_attack)  
         np.clip(perturbation, 0, 254)
         obs_new = obs + perturbation
         actions = model.action_probability(obs)
         actions_new = model.action_probability(obs_new)
-        action, _states = model.predict(obs_new)
+        if len(obs.shape) < 4:
+            action = model.predict(obs_new)
+        else:
+            action, _states = model.predict(obs_new)
+
         obs_candi, rewards, dones, infos = env.step(action)
         return obs_candi, rewards, dones, infos, obs_new, actions_new, perturbation
 
@@ -93,8 +109,14 @@ def main(game, method, pixels, tca, runname, run):
         'acktr': ACKTR,
         'sac': SAC
     }
-    
-    if '.pkl' in game or '.pickle' in game:
+
+    if customized_path != "":
+        dirs = customized_path.split("/")
+        model_save_name = dirs[-1]
+        model_dir = "/".join(dirs[:-1])
+        model = model_loader(model_dir, model_save_name)
+        print(f"Model {customized_path} loaded")
+    elif '.pkl' in game or '.pickle' in game:
         print("enter new load")
         model = modelMap[method].load("trained_agents/{}/{}".format(method, game))
         print(f"Model {method} loaded")
@@ -102,6 +124,30 @@ def main(game, method, pixels, tca, runname, run):
         print("enter original load")
         model = modelMap[method].load("trained_agents/{}/{}NoFrameskip-v4.pkl".format(method, game))
         print(f"Model {method}NoFrameskip-v4 loaded")
+
+
+    if customized_path != "":
+        original_env = gym.make(model.config['rl_params']['env_name'])
+        env = envGym(original_env, 4)
+        obs = env.reset()
+        model.action_probability = model.get_action_probabilistic
+
+        model.predict = lambda obs: model.get_action(obs, deterministic=True)
+        # env.render()
+
+    elif '.pkl' in game or '.pickle' in game:
+
+        # env = make_vec_env("LunarLanderContinuous-v2", n_envs=20)
+        env = make_vec_env(game.split(".")[0], n_envs=20)
+        
+    else:
+        env = make_atari_env('{}NoFrameskip-v4'.format(game), num_env=1, seed=run)
+        print(f"Make environment {game}NoFrameskip-v4: Done")
+        env = VecFrameStack(env, n_stack=4)
+        env.reset()
+        model.set_env(env)
+        obs = env.reset()
+   
 
     Episode_Reward = []
     Episode_Lenth  = []
@@ -114,20 +160,7 @@ def main(game, method, pixels, tca, runname, run):
     bounds = [[0,1] ,[0,1], [0,1]] * atk_num
 
 
-    if '.pkl' in game or '.pickle' in game:
-
-        # env = make_vec_env("LunarLanderContinuous-v2", n_envs=20)
-        env = make_vec_env(game.split(".")[0], n_envs=20)
-        
-        # print(f"Make environment {game}: Done")
-        # env = DummyVecEnv([lambda: env]) 
-    else:
-        env = make_atari_env('{}NoFrameskip-v4'.format(game), num_env=1, seed=run)
-        print(f"Make environment {game}NoFrameskip-v4: Done")
-        env = VecFrameStack(env, n_stack=4)
-    env.reset()
-    model.set_env(env)
-    obs = env.reset()
+   
     x0 = [0.5, 0.5, 0.5] * atk_num
     atk_time = 0
     TrueS_array = []
@@ -141,10 +174,15 @@ def main(game, method, pixels, tca, runname, run):
 
         if i % 1 == 0:              # cache our model every <save_epoch_freq> epochs
             print(f'Training model for run {run} epoch {i} / {epoch}')
-
         actions = model.action_probability(obs)
-        attack_significance = calculate_entropy(actions[0])
-        CleanS_array.append((obs[0, :, :, 3]).astype('uint8'))
+
+        if customized_path != "":
+            attack_significance = calculate_entropy(actions)
+            CleanS_array.append((obs[:, :, 3]).astype('uint8'))
+        else:
+            attack_significance = calculate_entropy(actions[0])
+            CleanS_array.append((obs[0, :, :, 3]).astype('uint8'))
+  
         if attack_significance <= tca:
             atk_time = atk_time+1
             l = alg(lambda variable: obj(variable, actions, obs), x0, xBound=bounds, verbose=False)
@@ -154,18 +192,33 @@ def main(game, method, pixels, tca, runname, run):
             solution = list(res)[0]
             obs, rewards, dones, infos, obs_new, actions_new, perturbation = evaluate(solution, obs)
             obs_store = np.int_(obs_new)
-            true_state = (obs_store[0, :, :, 3]).astype('uint8')
+            if customized_path != "":
+                true_state = (obs_store[:, :, 3]).astype('int8')
+                Delta_array.append(perturbation[:, :, 3].astype('uint8'))
+            else:
+                true_state = (obs_store[0, :, :, 3]).astype('uint8')
+                Delta_array.append(perturbation[0, :, :, 3].astype('uint8'))
             TrueS_array.append(true_state)
-            Delta_array.append(perturbation[0, :, :, 3].astype('uint8'))
         else:
             obs = np.int_(obs)
-            true_state = (obs[0, :, :, 3]).astype('uint8')
+            if customized_path != "":
+                true_state = (obs[:, :, 3]).astype('uint8')
+            else:
+                true_state = (obs[0, :, :, 3]).astype('uint8')
             TrueS_array.append(true_state)
             Delta_array.append(np.zeros([84, 84]).astype('uint8'))
-            action, _states = model.predict(obs)
+            if customized_path != "":
+                action = model.predict(obs)
+            else: 
+                action, _states = model.predict(obs)
+            
             obs, rewards, dones, infos = env.step(action)
 
-        episode_infos = infos[0].get('episode')
+        if customized_path !="":
+            episode_infos = infos.get('episode')
+        else:
+            episode_infos = infos[0].get('episode')
+
         if episode_infos is not None:
             print("Atari Episode Score: {:.2f}".format(episode_infos['r']))
             print("Atari Episode Length", episode_infos['l'])
@@ -180,6 +233,9 @@ def main(game, method, pixels, tca, runname, run):
     out_true  = cv2.VideoWriter('{}/true_run_{}.avi'.format(video_dir, run), cv2.VideoWriter_fourcc(*'XVID'), fps, size)  #*'PIM1'
     out_delta = cv2.VideoWriter('{}/delta_run_{}.avi'.format(video_dir, run), cv2.VideoWriter_fourcc(*'XVID'), fps, size)
     out_clean = cv2.VideoWriter('{}/clean_run_{}.avi'.format(video_dir, run), cv2.VideoWriter_fourcc(*'XVID'), fps, size)
+
+
+
     for i in range(len(TrueS_array)):
         image_true = TrueS_array[i]
         x_true = np.repeat(image_true, 3, axis=1)
@@ -226,18 +282,20 @@ def parse_arguments():
                         default=0.9, type=float)
     parser.add_argument('-r', '--runname',
                         help="The run name",
-                        default='test', type=str)     
+                        default='test', type=str)
+    parser.add_argument('--customized_path', default="",
+                        help="if using custermized model_loader or env creator", type=str)     
     args = parser.parse_args()
-    return args.game, args.algorithm, args.pixels, args.tca, args.runname
+    return args.game, args.algorithm, args.pixels, args.tca, args.runname, args.customized_path
 
 if __name__ == '__main__':
     # note: You could change pool number and X_input at the same time
     # p = Pool(1)
     
-    game, method, pixels, tca, runname = parse_arguments()
+    game, method, pixels, tca, runname,  customized_path = parse_arguments()
     
     # X_input = list(range(1,5))
     X_input = list(range(1, 10))
-    main(game, method, pixels, tca, runname, 1)
+    main(game, method, pixels, tca, runname, 1, customized_path)
     # func = partial(main,game,method,pixels,tca,runname)
     # p.map(func,X_input)
