@@ -33,19 +33,20 @@ os.environ['KMP_WARNINGS'] = 'off'
 def main(game, method, pixels, tca, runname, run, customized_path=''):
 
     def obj(variable, actions_0, obs):
+        brightness = np.min([obs.max(), 254])
         perturbation = np.zeros_like(obs)
         for i in range(len(variable) // 3):
             x = int(np.round(variable[3*i]*83))
             y = int(np.round(variable[3*i+1]*83))
-            pixel_attack = int(np.round(variable[3*i+2]*254))
+            pixel_attack = int(np.round(variable[3*i+2]*brightness))
             x = np.clip(x, 0, 83)
             y = np.clip(y, 0, 83)
-            pixel_attack = np.clip(pixel_attack, 0, 254)
+            pixel_attack = np.clip(pixel_attack, 0, brightness)
             if len(obs.shape) < 4:
                 perturbation[ x, y, :] = pixel_attack 
             else:
                 perturbation[:, x, y, :] = pixel_attack 
-        np.clip(perturbation, 0, 254)
+        np.clip(perturbation, 0, brightness)
         obs_new = obs + perturbation
         actions_new = model.action_probability(obs_new)
         if len(obs.shape) < 4:
@@ -55,21 +56,21 @@ def main(game, method, pixels, tca, runname, run, customized_path=''):
         return fitness_value
 
     def evaluate(variable, obs):
-
+        brightness = np.min([obs.max(), 254])
         perturbation = np.zeros_like(obs)
         for i in range(len(variable) // 3):
             x = int(np.round(variable[3 * i] * 83))
             y = int(np.round(variable[3 * i + 1] * 83))
-            pixel_attack = int(np.round(variable[3 * i + 2] * 254))
+            pixel_attack = int(np.round(variable[3 * i + 2] * brightness))
             x = np.clip(x, 0, 83)
             y = np.clip(y, 0, 83)
-            pixel_attack = np.clip(pixel_attack, 0, 254)
+            pixel_attack = np.clip(pixel_attack, 0, brightness)
             if len(obs.shape)<4:
                 perturbation[x, y, :] = pixel_attack
             else:
                 perturbation[: , x, y, :] = pixel_attack
             # print('pixel_attack', x, y, pixel_attack)  
-        np.clip(perturbation, 0, 254)
+        np.clip(perturbation, 0, brightness)
         obs_new = obs + perturbation
         actions = model.action_probability(obs)
         actions_new = model.action_probability(obs_new)
@@ -192,6 +193,8 @@ def main(game, method, pixels, tca, runname, run, customized_path=''):
             solution = list(res)[0]
             obs, rewards, dones, infos, obs_new, actions_new, perturbation = evaluate(solution, obs)
             obs_store = np.int_(obs_new)
+            print(f"min obs {obs.min()}, max obs {obs.max()}")
+            print(f"min obs_new {obs_new.min()}, max obs {obs_new.max()}")
             if customized_path != "":
                 true_state = (obs_store[:, :, 3]).astype('int8')
                 Delta_array.append(perturbation[:, :, 3].astype('uint8'))
@@ -201,6 +204,7 @@ def main(game, method, pixels, tca, runname, run, customized_path=''):
             TrueS_array.append(true_state)
         else:
             obs = np.int_(obs)
+            print(f"min obs {obs.min()}, max obs {obs.max()}")
             if customized_path != "":
                 true_state = (obs[:, :, 3]).astype('uint8')
             else:
