@@ -100,7 +100,7 @@ def main(game, method, pixels, tca, runname, customized_path='', run=1):
         return maxmax_dist
     
     def calculate_entropy(actions):
-        entropy_actions = [-probs * np.log(probs) / np.log(len(actions)) for probs in actions]
+        entropy_actions = [-probs * np.log(probs) / np.log(len(actions)) if probs>0 else 0 for probs in actions]
         entropy = np.sum(entropy_actions)
         return entropy
 
