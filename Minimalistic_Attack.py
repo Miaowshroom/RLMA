@@ -19,18 +19,18 @@ from Utils.envGym import envGym
 from cv2 import *
 
 
-# from multiprocessing import Pool
+from multiprocessing import Pool
 # import cv2
 # from multiprocessing import Pool
 # from itertools import product
-# from functools import partial
+from functools import partial
 
 # import os
 # mute os log
 os.environ['KMP_WARNINGS'] = 'off'
 
 
-def main(game, method, pixels, tca, runname, run, customized_path=''):
+def main(game, method, pixels, tca, runname, customized_path='', run=1):
 
     def obj(variable, actions_0, obs):
         brightness = np.min([obs.max(), 254])  # this takes min of the max brightness of the obs and 254, original code put 254
@@ -178,7 +178,7 @@ def main(game, method, pixels, tca, runname, run, customized_path=''):
 
     for i in range(epoch):
 
-        if i % 1 == 0:              # cache our model every <save_epoch_freq> epochs
+        if i % 10 == 0:              # cache our model every <save_epoch_freq> epochs
             print(f'Training model for run {run} epoch {i} / {epoch}')
         actions = model.action_probability(obs)
 
@@ -199,8 +199,8 @@ def main(game, method, pixels, tca, runname, run, customized_path=''):
             acc_solution.append(solution)
             obs, rewards, dones, infos, obs_new, actions_new, perturbation = evaluate(solution, obs)
             obs_store = np.int_(obs_new)
-            print(f"min obs {obs.min()}, max obs {obs.max()}")
-            print(f"min obs_new {obs_new.min()}, max obs {obs_new.max()}")
+            # print(f"min obs {obs.min()}, max obs {obs.max()}")
+            # print(f"min obs_new {obs_new.min()}, max obs {obs_new.max()}")
             if customized_path != "":
                 true_state = (obs_store[:, :, 3]).astype('uint8')
                 Delta_array.append(perturbation[:, :, 3].astype('uint8'))
@@ -214,7 +214,7 @@ def main(game, method, pixels, tca, runname, run, customized_path=''):
             TrueS_array.append(true_state)
         else:
             obs = np.int_(obs)
-            print(f"min obs {obs.min()}, max obs {obs.max()}")
+            # print(f"min obs {obs.min()}, max obs {obs.max()}")
             if customized_path != "":
                 true_state = (obs[:, :, 3]).astype('uint8')
             else:
@@ -317,12 +317,12 @@ def parse_arguments():
 
 if __name__ == '__main__':
     # note: You could change pool number and X_input at the same time
-    # p = Pool(1)
+    p = Pool(5)
     
     game, method, pixels, tca, runname,  customized_path = parse_arguments()
     
     # X_input = list(range(1,5))
-    X_input = list(range(1, 10))
-    main(game, method, pixels, tca, runname, 1, customized_path)
-    # func = partial(main,game,method,pixels,tca,runname)
-    # p.map(func,X_input)
+    X_input = list(range(1, 6))
+    # main(game, method, pixels, tca, runname, customized_path, 1)
+    func = partial(main, game, method, pixels, tca, runname, customized_path)
+    p.map(func,X_input)
