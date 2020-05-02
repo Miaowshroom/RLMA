@@ -29,11 +29,16 @@ This code is for the paper: Minimalistic Attacks: How Little it Takes to Fool a 
 	matplotlib
 
 	[more details in req.txt]
-# Run the code with command:
+# Run the code with command(to load the author's models): 
+	python Minimalistic_Attack.py    -g   'give a name you want/this will create the folder name'  -a   'not important'   -n   pixels_to_attack   -t   0.9   -r   'SAC-discrete (root name for the folder)' --customized_path "./SAC_model/saved_models/sac_discrete_atari_BeamRider-v4/sac_discrete_atari_BeamRider-v4_s3/tf1_save5"
+
+# Run the code with command(to load the author's models): 
 	python Minimalistic_Attack.py    -g   'Pong'  -a   'dqn'   -n   5   -t   0.9   -r   'dqnrun'
 	python Minimalistic_Attack.py    -g   'Pong'  -a   'a2c'   -n   5   -t   0.9   -r   'a2crun'
 	python Minimalistic_Attack.py   -g   'Pong'  -a   'ppo2'  -n   5   -t   0.9   -r   'ppo2run'
 	python Minimalistic_Attack.py   -g   'Pong'  -a   'acktr' -n   5   -t   0.9   -r   'acktrrun'
+
+
 # Run from shell
 	cd ~/RLMA
 	chmod +x run_dqn_attack.sh
