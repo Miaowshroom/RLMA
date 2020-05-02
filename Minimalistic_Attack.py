@@ -29,8 +29,21 @@ from functools import partial
 # mute os log
 os.environ['KMP_WARNINGS'] = 'off'
 
+def get_path(game, home_dir='./SAC_model'):
+    models = {
+        'Qbert':          ['Qbert', '24', '6', True], 
+        'Assault':        ['Assault',	'20','6', False],
+        'Enduro':         ['Enduro',	'12', '3', True	],
+        'BeamRider':      ['BeamRider', '24',	 '3', False],
+        'SpaceInvaders':  ['SpaceInvaders', '20',	'6',False],
+        'Breakout':       ['Breakout', '6', '6', True]}
+    
+    conf = models[game]
+    model_dir = f'{home_dir}/saved_models/sac_discrete_atari_{conf[0]}-v4/sac_discrete_atari_{conf[0]}-v4_s{conf[2]}/'
+    model_save_name = f'tf1_save{conf[1]}'
+    return model_dir + model_save_name
 
-def main(game, method, pixels, tca, runname, customized_path='', run=1):
+def main(game, method, pixels, tca, runname, customized=False, run=1):
 
     def obj(variable, actions_0, obs):
         brightness = np.min([obs.max(), 254])  # this takes min of the max brightness of the obs and 254, original code put 254
@@ -115,7 +128,8 @@ def main(game, method, pixels, tca, runname, customized_path='', run=1):
         'sac': SAC
     }
 
-    if customized_path != "":
+    if customized:
+        customized_path = get_path(game = game)
         dirs = customized_path.split("/")
         model_save_name = dirs[-1]
         model_dir = "/".join(dirs[:-1])
@@ -131,7 +145,7 @@ def main(game, method, pixels, tca, runname, customized_path='', run=1):
         print(f"Model {method}NoFrameskip-v4 loaded")
 
 
-    if customized_path != "":
+    if customized:
         original_env = gym.make(model.config['rl_params']['env_name'])
         env = envGym(original_env, 4)
         obs = env.reset()
@@ -182,7 +196,7 @@ def main(game, method, pixels, tca, runname, customized_path='', run=1):
             print(f'Training model for run {run} epoch {i} / {epoch}')
         actions = model.action_probability(obs)
 
-        if customized_path != "":
+        if customized:
             attack_significance = calculate_entropy(actions)
             CleanS_array.append((obs[:, :, 3]).astype('uint8'))
         else:
@@ -201,7 +215,7 @@ def main(game, method, pixels, tca, runname, customized_path='', run=1):
             obs_store = np.int_(obs_new)
             # print(f"min obs {obs.min()}, max obs {obs.max()}")
             # print(f"min obs_new {obs_new.min()}, max obs {obs_new.max()}")
-            if customized_path != "":
+            if customized:
                 true_state = (obs_store[:, :, 3]).astype('uint8')
                 Delta_array.append(perturbation[:, :, 3].astype('uint8'))
             else:
@@ -215,7 +229,7 @@ def main(game, method, pixels, tca, runname, customized_path='', run=1):
         else:
             obs = np.int_(obs)
             # print(f"min obs {obs.min()}, max obs {obs.max()}")
-            if customized_path != "":
+            if customized:
                 true_state = (obs[:, :, 3]).astype('uint8')
             else:
                 true_state = (obs[0, :, :, 3]).astype('uint8')
@@ -225,14 +239,14 @@ def main(game, method, pixels, tca, runname, customized_path='', run=1):
             #     print("min smaller than 0")
             #     pass
 
-            if customized_path != "":
+            if customized:
                 action = model.predict(obs)
             else: 
                 action, _states = model.predict(obs)
             
             obs, rewards, dones, infos = env.step(action)
 
-        if customized_path !="":
+        if customized:
             episode_infos = infos.get('episode')
         else:
             episode_infos = infos[0].get('episode')
@@ -292,7 +306,6 @@ def main(game, method, pixels, tca, runname, customized_path='', run=1):
     np.savetxt(f"{dir_name}/run_{run}_attacks.csv", np.array(acc_solution), delimiter=",")
     np.savetxt('{}/run_{}.csv'.format(dir_name, run), np.array([REWARD, atk_time, Lenth]), delimiter=",")
 
-
 def parse_arguments():
     parser = ArgumentParser()
     parser.add_argument('-g', '--game',
@@ -310,19 +323,18 @@ def parse_arguments():
     parser.add_argument('-r', '--runname',
                         help="The run name",
                         default='test', type=str)
-    parser.add_argument('--customized_path', default="",
-                        help="if using custermized model_loader or env creator", type=str)     
+    parser.add_argument('--customized', action='store_true', default=False)     
     args = parser.parse_args()
-    return args.game, args.algorithm, args.pixels, args.tca, args.runname, args.customized_path
+    return args.game, args.algorithm, args.pixels, args.tca, args.runname, args.customized
 
 if __name__ == '__main__':
     # note: You could change pool number and X_input at the same time
     p = Pool(5)
     
-    game, method, pixels, tca, runname,  customized_path = parse_arguments()
+    game, method, pixels, tca, runname,  customized= parse_arguments()
     
     # X_input = list(range(1,5))
     X_input = list(range(1, 6))
-    # main(game, method, pixels, tca, runname, customized_path, 1)
-    func = partial(main, game, method, pixels, tca, runname, customized_path)
+    # main(game, method, pixels, tca, runname, customized, 1)
+    func = partial(main, game, method, pixels, tca, runname, customized)
     p.map(func,X_input)
