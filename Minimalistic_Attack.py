@@ -174,6 +174,7 @@ def main(game, method, pixels, tca, runname, run, customized_path=''):
 
     print(f"Start training! run number {run}")
     epoch = 5000
+    acc_solution = []
 
     for i in range(epoch):
 
@@ -195,16 +196,21 @@ def main(game, method, pixels, tca, runname, run, customized_path=''):
             l.maxEvaluations = 400
             res = l.learn()
             solution = list(res)[0]
+            acc_solution.append(solution)
             obs, rewards, dones, infos, obs_new, actions_new, perturbation = evaluate(solution, obs)
             obs_store = np.int_(obs_new)
             print(f"min obs {obs.min()}, max obs {obs.max()}")
             print(f"min obs_new {obs_new.min()}, max obs {obs_new.max()}")
             if customized_path != "":
-                true_state = (obs_store[:, :, 3]).astype('int8')
+                true_state = (obs_store[:, :, 3]).astype('uint8')
                 Delta_array.append(perturbation[:, :, 3].astype('uint8'))
             else:
                 true_state = (obs_store[0, :, :, 3]).astype('uint8')
                 Delta_array.append(perturbation[0, :, :, 3].astype('uint8'))
+
+            # if true_state.min()<0:
+            #     print("min smaller than 0")
+            #     pass
             TrueS_array.append(true_state)
         else:
             obs = np.int_(obs)
@@ -215,6 +221,10 @@ def main(game, method, pixels, tca, runname, run, customized_path=''):
                 true_state = (obs[0, :, :, 3]).astype('uint8')
             TrueS_array.append(true_state)
             Delta_array.append(np.zeros([84, 84]).astype('uint8'))
+            # if true_state.min()<0:
+            #     print("min smaller than 0")
+            #     pass
+
             if customized_path != "":
                 action = model.predict(obs)
             else: 
@@ -233,6 +243,10 @@ def main(game, method, pixels, tca, runname, run, customized_path=''):
             REWARD = episode_infos['r']  # length of REWARD
             Lenth = episode_infos['l']  # length of episode
             break
+
+        if dones:
+            pass
+
     size = (84, 84)
     video_dir = 'results/{}_videos/{}/{}/FSA_{}_TCA_{}'.format(runname, method, game, pixels, tca)
     if not os.path.exists(video_dir):
@@ -246,22 +260,25 @@ def main(game, method, pixels, tca, runname, run, customized_path=''):
 
     for i in range(len(TrueS_array)):
         image_true = TrueS_array[i]
-        x_true = np.repeat(image_true, 3, axis=1)
-        x_true = x_true.reshape(84, 84, 3)
-        x_true[:, :, 0] = 150 * np.ones((84, 84), dtype=int)
-        x_true[:, :, 1] = 150 * np.ones((84, 84), dtype=int)
+        x_true = cv2.cvtColor(image_true, cv2.COLOR_GRAY2RGB)
+        # x_true = np.repeat(image_true, 3, axis=1)
+        # x_true = x_true.reshape(84, 84, 3)
+        # x_true[:, :, 0] = 150 * np.ones((84, 84), dtype=int)
+        # x_true[:, :, 1] = 150 * np.ones((84, 84), dtype=int)
         out_true.write(x_true)
         image_delta = Delta_array[i]
-        x_delta = np.repeat(image_delta, 3, axis=1)
-        x_delta = x_delta.reshape(84, 84, 3)
-        x_delta[:, :, 0] = 150 * np.ones((84, 84), dtype=int)
-        x_delta[:, :, 1] = 150 * np.ones((84, 84), dtype=int)
+        x_delta = cv2.cvtColor(image_delta, cv2.COLOR_GRAY2RGB)
+        # x_delta = np.repeat(image_delta, 3, axis=1)
+        # x_delta = x_delta.reshape(84, 84, 3)
+        # x_delta[:, :, 0] = 150 * np.ones((84, 84), dtype=int)
+        # x_delta[:, :, 1] = 150 * np.ones((84, 84), dtype=int)
         out_delta.write(x_delta)
         image_clean = CleanS_array[i]
-        x_clean = np.repeat(image_clean, 3, axis=1)
-        x_clean = x_clean.reshape(84, 84, 3)
-        x_clean[:, :, 0] = 150 * np.ones((84, 84), dtype=int)
-        x_clean[:, :, 1] = 150 * np.ones((84, 84), dtype=int)
+        x_clean = cv2.cvtColor(image_clean, cv2.COLOR_GRAY2RGB)
+        # x_clean = np.repeat(image_clean, 3, axis=1)
+        # x_clean = x_clean.reshape(84, 84, 3)
+        # x_clean[:, :, 0] = 150 * np.ones((84, 84), dtype=int)
+        # x_clean[:, :, 1] = 150 * np.ones((84, 84), dtype=int)
         out_clean.write(x_clean)
     cv2.destroyAllWindows()
     out_true.release()
@@ -270,8 +287,10 @@ def main(game, method, pixels, tca, runname, run, customized_path=''):
     Episode_Reward.append(REWARD)
     Episode_Lenth.append(Lenth)
     Attack_times.append(atk_time)
-    data = np.column_stack((Episode_Reward, Attack_times, Episode_Lenth))
-    np.savetxt('{}/run_{}.dat'.format(dir_name, run), data)
+    np.array([REWARD,atk_time, Lenth])
+    # data = np.column_stack(Episode_Reward, Attack_times, Episode_Lenth)
+    np.savetxt(f"{dir_name}/run_{run}_attacks.csv", np.array(acc_solution), delimiter=",")
+    np.savetxt('{}/run_{}.csv'.format(dir_name, run), np.array([REWARD, atk_time, Lenth]), delimiter=",")
 
 
 def parse_arguments():
