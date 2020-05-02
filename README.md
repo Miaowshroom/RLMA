@@ -30,7 +30,16 @@ This code is for the paper: Minimalistic Attacks: How Little it Takes to Fool a 
 
 	[more details in req.txt]
 # Run the code with command(to load the our models): 
-	python Minimalistic_Attack.py    -g   'give a name you want/this will create the folder name'  -a   'not important'   -n   pixels_to_attack   -t   0.9   -r   'SAC-discrete (root name for the folder)' --customized_path "./SAC_model/saved_models/sac_discrete_atari_BeamRider-v4/sac_discrete_atari_BeamRider-v4_s3/tf1_save5"
+	python Minimalistic_Attack.py    
+	-g   'give the game name you want/to load the model'  
+	-a   'not important, which algorithm'   
+	-n   pixels_to_attack   
+	-t   0.9   
+	-r   'SAC-discrete (root name for the folder)' --customized (if use YN's model) 
+	--use_gpu (if use gpu) --gpu (which gpu)
+
+	python Minimalistic_Attack.py -g 'Breakout' -a 'SAC_discrete' -n 1 -t 0.6129 -r SAC-discrete --customized --use_gpu --gpu 1
+
 
 # Run the code with command(to load the author's models): 
 	python Minimalistic_Attack.py    -g   'Pong'  -a   'dqn'   -n   5   -t   0.9   -r   'dqnrun'

@@ -323,15 +323,27 @@ def parse_arguments():
     parser.add_argument('-r', '--runname',
                         help="The run name",
                         default='test', type=str)
+    parser.add_argument('--use_gpu', action='store_true', default=False)
+    parser.add_argument('--gpu', type=str, default='0')
     parser.add_argument('--customized', action='store_true', default=False)     
     args = parser.parse_args()
-    return args.game, args.algorithm, args.pixels, args.tca, args.runname, args.customized
+    return args.game, args.algorithm, args.pixels, args.tca, args.runname, args.customized, args.use_gpu, args.gpu
 
 if __name__ == '__main__':
     # note: You could change pool number and X_input at the same time
     p = Pool(5)
     
-    game, method, pixels, tca, runname,  customized= parse_arguments()
+    game, method, pixels, tca, runname,  customized, use_gpu, gpu = parse_arguments()
+    
+    # Tensorflow
+    if(use_gpu):
+        os.environ['CUDA_VISIBLE_DEVICES'] = gpu
+        # configure gpu use and supress tensorflow warnings
+        import tensorflow as tf
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.9)
+        tf_config = tf.compat.v1.ConfigProto(gpu_options=gpu_options)
+        tf_config.gpu_options.allow_growth = True
+        tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
     
     # X_input = list(range(1,5))
     X_input = list(range(1, 6))
