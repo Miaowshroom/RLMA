@@ -43,7 +43,7 @@ def get_path(game, home_dir='./SAC_model'):
     model_save_name = f'tf1_save{conf[1]}'
     return model_dir + model_save_name
 
-def main(game, method, pixels, tca, runname, deterministic, customized=False, run=1):
+def main(game, method, pixels, tca, runname, deterministic, customized=False, customized_xf=False, run=1):
     
     def obj(variable, actions_0, obs):
         brightness = np.min([obs.max(), 254])  # this takes min of the max brightness of the obs and 254, original code put 254
@@ -153,12 +153,18 @@ def main(game, method, pixels, tca, runname, deterministic, customized=False, ru
 
         model.predict = lambda obs: model.get_action(obs, deterministic=deterministic)
         # env.render()
-
+    
+    elif customized_xf:
+        # customized env by Yining, but trained by Xiaofeng using stable-baselines' A2C
+        env = gym.make(game.split(".")[0]+"-v4")
+        env = envGym(env, 4)
+        obs = env.reset()
+   
     elif '.pkl' in game or '.pickle' in game:
 
         # env = make_vec_env("LunarLanderContinuous-v2", n_envs=20)
         env = make_vec_env(game.split(".")[0], n_envs=20)
-        
+
     else:
         env = make_atari_env('{}NoFrameskip-v4'.format(game), num_env=1, seed=run)
         print(f"Make environment {game}NoFrameskip-v4: Done")
@@ -199,6 +205,11 @@ def main(game, method, pixels, tca, runname, deterministic, customized=False, ru
         if customized:
             attack_significance = calculate_entropy(actions)
             CleanS_array.append((obs[:, :, 3]).astype('uint8'))
+
+        elif customized_xf:
+            attack_significance = calculate_entropy(actions)
+            CleanS_array.append((obs[:, :, 3]).astype('uint8'))            
+        
         else:
             attack_significance = calculate_entropy(actions[0])
             CleanS_array.append((obs[0, :, :, 3]).astype('uint8'))
@@ -215,7 +226,7 @@ def main(game, method, pixels, tca, runname, deterministic, customized=False, ru
             obs_store = np.int_(obs_new)
             # print(f"min obs {obs.min()}, max obs {obs.max()}")
             # print(f"min obs_new {obs_new.min()}, max obs {obs_new.max()}")
-            if customized:
+            if customized or customized_xf:
                 true_state = (obs_store[:, :, 3]).astype('uint8')
                 Delta_array.append(perturbation[:, :, 3].astype('uint8'))
             else:
@@ -229,7 +240,7 @@ def main(game, method, pixels, tca, runname, deterministic, customized=False, ru
         else:
             obs = np.int_(obs)
             # print(f"min obs {obs.min()}, max obs {obs.max()}")
-            if customized:
+            if customized or customized_xf:
                 true_state = (obs[:, :, 3]).astype('uint8')
             else:
                 true_state = (obs[0, :, :, 3]).astype('uint8')
@@ -246,7 +257,7 @@ def main(game, method, pixels, tca, runname, deterministic, customized=False, ru
             
             obs, rewards, dones, infos = env.step(action)
 
-        if customized:
+        if customized or customized_xf:
             episode_infos = infos.get('episode')
         else:
             episode_infos = infos[0].get('episode')
@@ -324,19 +335,23 @@ def parse_arguments():
                         help="The run name",
                         default='test', type=str)
     parser.add_argument('--use_gpu', action='store_true', default=False)
+    parser.add_argument('--gpu_id', default='0', type=str)
     parser.add_argument('--customized', action='store_true', default=False) 
+    parser.add_argument('--customized_xf', action='store_true', default=False)
     parser.add_argument('-d', '--deterministic', action='store_true', default=False)    
     args = parser.parse_args()
-    return args.game, args.algorithm, args.pixels, args.tca, args.runname, args.customized, args.use_gpu, args.deterministic
+    return args.game, args.algorithm, args.pixels, args.tca, args.runname, args.customized, args.customized_xf, args.use_gpu, args.gpu_id, args.deterministic
 
 if __name__ == '__main__':
     # note: You could change pool number and X_input at the same time
     p = Pool(5)
     
-    game, method, pixels, tca, runname,  customized, use_gpu, deterministic = parse_arguments()
+    game, method, pixels, tca, runname,  customized, customized_xf, use_gpu, gpu_id, deterministic = parse_arguments()
     
     # Tensorflow
     if(use_gpu):
+        print(gpu_id)
+        os.environ["CUDA_VISIBLE_DEVICES"]=gpu_id
         # configure gpu use and supress tensorflow warnings
         import tensorflow as tf
         gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.6)
@@ -347,5 +362,5 @@ if __name__ == '__main__':
     # X_input = list(range(1,5))
     X_input = list(range(1, 6))
     # main(game, method, pixels, tca, runname, deterministic, customized, 1)
-    func = partial(main, game, method, pixels, tca, runname, deterministic, customized)
+    func = partial(main, game, method, pixels, tca, runname, deterministic, customized, customized_xf)
     p.map(func,X_input)

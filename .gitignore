@@ -5,4 +5,4 @@ results/
 temp_image
 SAC_model
 *.pyc
-
+.ipynb_checkpoints/
