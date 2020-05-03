@@ -6,16 +6,15 @@ import matplotlib.pyplot as plt
 from argparse import ArgumentParser
 import time
 import gym
+from pybrain.optimization import GA, CMAES, HillClimber, RandomSearch
+from stable_baselines import DQN, PPO2, A2C, ACER, ACKTR, SAC
+from Utils.model_loader import model_loader
+from Utils.envGym import envGym
 from stable_baselines.common.atari_wrappers import make_atari
 from stable_baselines.deepq.policies import MlpPolicy, CnnPolicy
 from stable_baselines.common.cmd_util import make_atari_env
 from stable_baselines.common import make_vec_env
 from stable_baselines.common.vec_env import VecFrameStack, DummyVecEnv
-from pybrain.optimization import GA, CMAES, HillClimber, RandomSearch
-from stable_baselines import DQN, PPO2, A2C, ACER, ACKTR, SAC
-from Utils.model_loader import model_loader
-from Utils.envGym import envGym
-
 from cv2 import *
 
 
@@ -324,25 +323,32 @@ def parse_arguments():
                         help="The run name",
                         default='test', type=str)
     parser.add_argument('--use_gpu', action='store_true', default=False)
+    parser.add_argument('--gpu', '-gpu', default='0,1', type=str)
     parser.add_argument('--customized', action='store_true', default=False) 
-    parser.add_argument('-d', '--deterministic', action='store_true', default=False)    
+    parser.add_argument('--d', action='store_true', default=False)    
     args = parser.parse_args()
-    return args.game, args.algorithm, args.pixels, args.tca, args.runname, args.customized, args.use_gpu, args.deterministic
+    return args.game, args.algorithm, args.pixels, args.tca, args.runname, args.customized, args.use_gpu, args.gpu, args.d
 
 if __name__ == '__main__':
     # note: You could change pool number and X_input at the same time
     p = Pool(5)
     
-    game, method, pixels, tca, runname,  customized, use_gpu, deterministic = parse_arguments()
-    
-    # Tensorflow
+    game, method, pixels, tca, runname,  customized, use_gpu, gpu, deterministic = parse_arguments()
+
+
+    # Tensorflow    
     if(use_gpu):
+        os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+        os.environ["CUDA_VISIBLE_DEVICES"] = gpu
         # configure gpu use and supress tensorflow warnings
         import tensorflow as tf
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.6)
-        tf_config = tf.compat.v1.ConfigProto(gpu_options=gpu_options)
-        tf_config.gpu_options.allow_growth = True
         tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+        print('Tensorflow imported, version',tf.__version__)
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True
+        config.gpu_options.per_process_gpu_memory_fraction = 0.6
+        print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
+        
     
     # X_input = list(range(1,5))
     X_input = list(range(1, 6))

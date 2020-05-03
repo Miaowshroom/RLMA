@@ -5,4 +5,6 @@ results/
 temp_image
 SAC_model
 *.pyc
-
+Utils/autoemail.py
+./gitignore
+Utils/compare*
