@@ -186,7 +186,7 @@ def main(game, method, pixels, tca, runname, deterministic, customized=False, ru
     CleanS_array = []
 
     print(f"Start training! run number {run}")
-    epoch = 5000
+    epoch = 10000
     acc_solution = []
 
     for i in range(epoch):
