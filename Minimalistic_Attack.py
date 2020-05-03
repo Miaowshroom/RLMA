@@ -327,13 +327,13 @@ def parse_arguments():
     parser.add_argument('--customized', action='store_true', default=False) 
     parser.add_argument('-d', '--deterministic', action='store_true', default=False)    
     args = parser.parse_args()
-    return args.game, args.algorithm, args.pixels, args.tca, args.runname, args.customized, args.use_gpu, args.gpu, args.deterministic
+    return args.game, args.algorithm, args.pixels, args.tca, args.runname, args.customized, args.use_gpu, args.deterministic
 
 if __name__ == '__main__':
     # note: You could change pool number and X_input at the same time
     p = Pool(5)
     
-    game, method, pixels, tca, runname,  customized, use_gpu, gpu, deterministic = parse_arguments()
+    game, method, pixels, tca, runname,  customized, use_gpu, deterministic = parse_arguments()
     
     # Tensorflow
     if(use_gpu):
