@@ -43,7 +43,7 @@ def get_path(game, home_dir='./SAC_model'):
     model_save_name = f'tf1_save{conf[1]}'
     return model_dir + model_save_name
 
-def main(game, method, pixels, tca, runname, customized=False, run=1, deterministic):
+def main(game, method, pixels, tca, runname, deterministic, customized=False, run=1):
     
     def obj(variable, actions_0, obs):
         brightness = np.min([obs.max(), 254])  # this takes min of the max brightness of the obs and 254, original code put 254
@@ -171,7 +171,7 @@ def main(game, method, pixels, tca, runname, customized=False, run=1, determinis
     Episode_Reward = []
     Episode_Lenth  = []
     Attack_times   = []
-    dir_name = 'results/{}/{}/{}/FSA_{}_TCA_{}'.format(runname, method, game, pixels, tca)
+    dir_name = 'results/{}/{}_{}/{}/FSA_{}_TCA_{}'.format(runname, method, deterministic, game, pixels, tca)
     print(f"result will be save in {dir_name}")
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
@@ -262,7 +262,7 @@ def main(game, method, pixels, tca, runname, customized=False, run=1, determinis
             pass
 
     size = (84, 84)
-    video_dir = 'results/{}_videos/{}/{}/FSA_{}_TCA_{}'.format(runname, method, game, pixels, tca)
+    video_dir = 'results/{}_videos/{}_{}/{}/FSA_{}_TCA_{}'.format(runname, method, deterministic, game, pixels, tca)
     if not os.path.exists(video_dir):
         os.makedirs(video_dir)
     fps = 10
@@ -348,6 +348,6 @@ if __name__ == '__main__':
     
     # X_input = list(range(1,5))
     X_input = list(range(1, 6))
-    # main(game, method, pixels, tca, runname, customized, 1)
-    func = partial(main, game, method, pixels, tca, runname, customized, deterministic)
+    # main(game, method, pixels, tca, runname, deterministic, customized, 1)
+    func = partial(main, game, method, pixels, tca, runname, deterministic, customized)
     p.map(func,X_input)
