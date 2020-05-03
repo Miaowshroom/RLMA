@@ -43,8 +43,8 @@ def get_path(game, home_dir='./SAC_model'):
     model_save_name = f'tf1_save{conf[1]}'
     return model_dir + model_save_name
 
-def main(game, method, pixels, tca, runname, customized=False, run=1):
-
+def main(game, method, pixels, tca, runname, customized=False, run=1, deterministed):
+    
     def obj(variable, actions_0, obs):
         brightness = np.min([obs.max(), 254])  # this takes min of the max brightness of the obs and 254, original code put 254
         perturbation = np.zeros_like(obs)
@@ -151,7 +151,7 @@ def main(game, method, pixels, tca, runname, customized=False, run=1):
         obs = env.reset()
         model.action_probability = model.get_action_probabilistic
 
-        model.predict = lambda obs: model.get_action(obs, deterministic=True)
+        model.predict = lambda obs: model.get_action(obs, deterministic=deterministed)
         # env.render()
 
     elif '.pkl' in game or '.pickle' in game:
@@ -325,15 +325,16 @@ def parse_arguments():
                         default='test', type=str)
     parser.add_argument('--use_gpu', action='store_true', default=False)
     parser.add_argument('--gpu', type=str, default='0')
-    parser.add_argument('--customized', action='store_true', default=False)     
+    parser.add_argument('--customized', action='store_true', default=False) 
+    parser.add_argument('--deterministed', action='store_true', default=False)    
     args = parser.parse_args()
-    return args.game, args.algorithm, args.pixels, args.tca, args.runname, args.customized, args.use_gpu, args.gpu
+    return args.game, args.algorithm, args.pixels, args.tca, args.runname, args.customized, args.use_gpu, args.gpu, args.deterministed
 
 if __name__ == '__main__':
     # note: You could change pool number and X_input at the same time
     p = Pool(5)
     
-    game, method, pixels, tca, runname,  customized, use_gpu, gpu = parse_arguments()
+    game, method, pixels, tca, runname,  customized, use_gpu, gpu, deterministed = parse_arguments()
     
     # Tensorflow
     if(use_gpu):
@@ -348,5 +349,5 @@ if __name__ == '__main__':
     # X_input = list(range(1,5))
     X_input = list(range(1, 6))
     # main(game, method, pixels, tca, runname, customized, 1)
-    func = partial(main, game, method, pixels, tca, runname, customized)
+    func = partial(main, game, method, pixels, tca, runname, customized, deterministed)
     p.map(func,X_input)
