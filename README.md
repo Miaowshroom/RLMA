@@ -35,12 +35,12 @@ This code is for the paper: Minimalistic Attacks: How Little it Takes to Fool a 
 	-a   'not important, which algorithm'   
 	-n   pixels_to_attack   
 	-t   0.9   
-	-d 	 'if use deterministic or stochastic policy' 
+	-d 	 (if use deterministic or stochastic policy) 
 	-r   'SAC-discrete (root name for the folder)'
 	--customized (if use YN's model)
-	--use_gpu (if use gpu) --gpu (which gpu)
+	--use_gpu (if use gpu)
 
-	python Minimalistic_Attack.py -g 'Breakout' -a 'SAC_discrete' -n 1 -t 0.6129 -r SAC-discrete --customized --use_gpu --gpu 1
+	python Minimalistic_Attack.py -g 'Breakout' -a 'SAC_discrete' -n 1 -t 0.6129 -r SAC-discrete --customized --use_gpu
 
 
 # Run the code with command(to load the author's models): 

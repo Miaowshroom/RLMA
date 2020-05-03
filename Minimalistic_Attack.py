@@ -324,7 +324,6 @@ def parse_arguments():
                         help="The run name",
                         default='test', type=str)
     parser.add_argument('--use_gpu', action='store_true', default=False)
-    parser.add_argument('--gpu', type=str, default='0')
     parser.add_argument('--customized', action='store_true', default=False) 
     parser.add_argument('-d', '--deterministic', action='store_true', default=False)    
     args = parser.parse_args()
@@ -338,10 +337,9 @@ if __name__ == '__main__':
     
     # Tensorflow
     if(use_gpu):
-        os.environ['CUDA_VISIBLE_DEVICES'] = gpu
         # configure gpu use and supress tensorflow warnings
         import tensorflow as tf
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.9)
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.6)
         tf_config = tf.compat.v1.ConfigProto(gpu_options=gpu_options)
         tf_config.gpu_options.allow_growth = True
         tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
