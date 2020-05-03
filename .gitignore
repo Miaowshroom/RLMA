@@ -6,3 +6,7 @@ temp_image
 SAC_model
 *.pyc
 .ipynb_checkpoints/
+Utils/autoemail.py
+./gitignore
+Utils/compare*
+

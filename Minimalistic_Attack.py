@@ -335,23 +335,23 @@ def parse_arguments():
                         help="The run name",
                         default='test', type=str)
     parser.add_argument('--use_gpu', action='store_true', default=False)
-    parser.add_argument('--gpu_id', default='0', type=str)
+    parser.add_argument('--gpu', default='0', type=str)
     parser.add_argument('--customized', action='store_true', default=False) 
     parser.add_argument('--customized_xf', action='store_true', default=False)
     parser.add_argument('-d', '--deterministic', action='store_true', default=False)    
     args = parser.parse_args()
-    return args.game, args.algorithm, args.pixels, args.tca, args.runname, args.customized, args.customized_xf, args.use_gpu, args.gpu_id, args.deterministic
+    return args.game, args.algorithm, args.pixels, args.tca, args.runname, args.customized, args.customized_xf, args.use_gpu, args.gpu, args.deterministic
 
 if __name__ == '__main__':
     # note: You could change pool number and X_input at the same time
     p = Pool(5)
     
-    game, method, pixels, tca, runname,  customized, customized_xf, use_gpu, gpu_id, deterministic = parse_arguments()
+    game, method, pixels, tca, runname,  customized, customized_xf, use_gpu, gpu, deterministic = parse_arguments()
     
     # Tensorflow
     if(use_gpu):
-        print(gpu_id)
-        os.environ["CUDA_VISIBLE_DEVICES"]=gpu_id
+        os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+        os.environ["CUDA_VISIBLE_DEVICES"]=gpu
         # configure gpu use and supress tensorflow warnings
         import tensorflow as tf
         gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.6)
