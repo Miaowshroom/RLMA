@@ -31,11 +31,11 @@ This code is for the paper: Minimalistic Attacks: How Little it Takes to Fool a 
 	[more details in req.txt]
 # Run the code with command(to load the our models): 
 	python Minimalistic_Attack.py    
-	-g   'give the game name you want/to load the model'
-	-d (if use deterministic or stochastic policy)  
+	-g   'give the game name you want/to load the model' 
 	-a   'not important, which algorithm'   
 	-n   pixels_to_attack   
 	-t   0.9   
+	-d 	 'if use deterministic or stochastic policy' 
 	-r   'SAC-discrete (root name for the folder)'
 	--customized (if use YN's model)
 	--use_gpu (if use gpu) --gpu (which gpu)
