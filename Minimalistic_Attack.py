@@ -346,7 +346,7 @@ if __name__ == '__main__':
         print('Tensorflow imported, version',tf.__version__)
         config = tf.ConfigProto()
         config.gpu_options.allow_growth = True
-        config.gpu_options.per_process_gpu_memory_fraction = 0.6
+        config.gpu_options.per_process_gpu_memory_fraction = 0.4
         print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
         
     
