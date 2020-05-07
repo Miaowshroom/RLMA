@@ -9,4 +9,7 @@ SAC_model
 Utils/autoemail.py
 ./gitignore
 Utils/compare*
-
+backup/
+results_10_runs_backup
+*.zip
+*N*.sh
