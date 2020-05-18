@@ -1,0 +1,132 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "Python: DQN_Minimalistic_Attack.py run",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/DQN_Minimalistic_Attack.py",
+            "args": [
+                "-g",
+                "Pong",
+                "-a",
+                "dqn",
+                "-n",
+                "5",
+                "-t",
+                "0.9",
+                "-r",
+                "dqnrun"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: Minimalistic_Attack.py run",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/Minimalistic_Attack.py",
+            "args": [
+                "-g",
+                "Pong",
+                "-a",
+                "dqn",
+                "-n",
+                "1",
+                "-t",
+                "0.9",
+                "-r",
+                "dqnrun"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Python: Minimalistic_Attack.py additional trained agent",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/Minimalistic_Attack.py",
+            "args": [
+                "-g",
+                "LunarLanderContinuous-v2.pkl",
+                "-a",
+                "a2c",
+                "-n",
+                "1",
+                "-t",
+                "0.9",
+                "-r",
+                "a2crun"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Python: Minimalistic_Attack.py additional trained agent discrete",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/Minimalistic_Attack.py",
+            "args": [
+                "-g",
+                "BipedalWalkerHardcore-v3.pkl",
+                "-a",
+                "a2c",
+                "-n",
+                "1",
+                "-t",
+                "0.9",
+                "-r",
+                "a2crun"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Python: Minimalistic_Attack.py customized model",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/Minimalistic_Attack.py",
+            "args": [
+                "-g",
+                "BeamRider",
+                "-a",
+                "a2c",
+                "-n",
+                "3",
+                "-t",
+                "0.001",
+                "-r",
+                "SAC-discrete",
+                "--customized_path",
+                "./SAC_model/saved_models/sac_discrete_atari_BeamRider-v4/sac_discrete_atari_BeamRider-v4_s3/tf1_save5"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Python: Minimalistic_Attack.py beamRider a2c",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/Minimalistic_Attack.py",
+            "args": [
+                "-g",
+                "BeamRider",
+                "-a",
+                "a2c",
+                "-n",
+                "2",
+                "-t",
+                "0.4",
+                "-r",
+                "a2crun_video_test",
+                "--customized_path",
+                ""
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        }
+    ]
+}
